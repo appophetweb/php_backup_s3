@@ -82,7 +82,7 @@ function backupFiles($targets, $prefix = '') {
 
     // compress local files
     $cleanTarget = urlencode($target);
-    `tar -cjf "$prefix-$cleanTarget.tar.bz2" -C / "$target"`;
+    `tar -cjf "/home/s3-backup/$prefix-$cleanTarget.tar.bz2" -C / "$target"`;
 
     $backup_to = s3Path($prefix,"/".$target."backup.tar.bz2");
 
@@ -91,7 +91,7 @@ function backupFiles($targets, $prefix = '') {
     }
 
     // upload to s3
-    $success = $s3->putObjectFile("$prefix-$cleanTarget.tar.bz2",awsBucket,$backup_to);
+    $success = $s3->putObjectFile("/home/s3-backup/$prefix-$cleanTarget.tar.bz2",awsBucket,$backup_to);
 
     // remove temp file
     `rm -rf "$prefix-$cleanTarget.tar.bz2"`;
@@ -141,10 +141,10 @@ function backupDBs($hostname, $username, $password, $prefix, $post_backup_query 
 function backupDB($hostname, $username, $password, $database, $prefix, $post_backup_query = '') {
 	global $s3, $mysql_backup_options;
 
-	`mysqldump $mysql_backup_options --no-data --host=$hostname --user=$username --password='$password' $database | bzip2  > $database-structure-backup.sql.bz2`;
-  `mysqldump $mysql_backup_options --host=$hostname --user=$username --password='$password' $database | bzip2 > $database-data-backup.sql.bz2`;
-  $successStructure = $s3->putObjectFile("$database-structure-backup.sql.bz2",awsBucket,s3Path($prefix,"/".$database."-structure-backup.sql.bz2"));
-  $successData = $s3->putObjectFile("$database-data-backup.sql.bz2",awsBucket,s3Path($prefix,"/".$database."-data-backup.sql.bz2"));
+	`mysqldump $mysql_backup_options --no-data --host=$hostname --user=$username --password='$password' $database | bzip2  > /home/s3-backup/$database-structure-backup.sql.bz2`;
+  `mysqldump $mysql_backup_options --host=$hostname --user=$username --password='$password' $database | bzip2 > /home/s3-backup/$database-data-backup.sql.bz2`;
+  $successStructure = $s3->putObjectFile("/home/s3-backup/$database-structure-backup.sql.bz2",awsBucket,s3Path($prefix,"/".$database."-structure-backup.sql.bz2"));
+  $successData = $s3->putObjectFile("/home/s3-backup/$database-data-backup.sql.bz2",awsBucket,s3Path($prefix,"/".$database."-data-backup.sql.bz2"));
 
   `rm -rf $database-structure-backup.sql.bz2 $database-data-backup.sql.bz2`;
 
